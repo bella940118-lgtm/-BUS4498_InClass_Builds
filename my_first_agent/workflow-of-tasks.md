@@ -26,30 +26,26 @@ An organizer reviews the recommendation before making a final decision. If the i
 
 
 ```mermaid
-
 flowchart TD
-    T1["T1: Get registration information"] --> T2["T2: Get optional attendance responses"]
-    T2 --> T3["T3: Check the information"]
-    T3 --> D1{"Is the information complete?"}
+    T1["T1: Get registration data"] --> T2["T2: Get optional attendance confirmations"]
+    T2 --> T3["T3: Check the data"]
+    T3 --> D1{"Is the data complete and usable?"}
 
     D1 -->|Yes| T4["T4: Estimate attendance"]
-    D1 -->|No| H1["H1: Ask organizer to review information"]
+    D1 -->|No| H1["H1: Organizer reviews missing or incorrect data"]
+    H1 --> T3
 
-    H1 --> D2{"Can the organizer fix the information?"}
-    D2 -->|Yes| T3
-    D2 -->|No| C2([C2: Stop without a recommendation])
-
-    T4 --> D3{"Does the estimate look reasonable?"}
-    D3 -->|Yes| T5["T5: Suggest supply amounts"]
-    D3 -->|No| H2["H2: Ask organizer to review estimate"]
-
+    T4 --> D2{"Does the estimate look reasonable?"}
+    D2 -->|Yes| T5["T5: Suggest food, drinks, and swag amounts"]
+    D2 -->|No| H2["H2: Organizer reviews unusual estimate"]
     H2 --> T5
-    T5 --> T6["T6: Show recommendation to organizer"]
-    T6 --> D4{"Does the organizer approve it?"}
 
-    D4 -->|Yes| T7["T7: Save supply plan"]
-    D4 -->|Change it| T8["T8: Save changed supply plan"]
-    D4 -->|Request new estimate| T1
+    T5 --> T6["T6: Show recommendation to organizer"]
+    T6 --> D3{"Does the organizer approve the plan?"}
+
+    D3 -->|Yes| T7["T7: Save supply plan"]
+    D3 -->|Change plan| T8["T8: Save changed supply plan"]
+    D3 -->|Request new estimate| T1
 
     T7 --> C1([C1: Supply plan is complete])
     T8 --> C1
