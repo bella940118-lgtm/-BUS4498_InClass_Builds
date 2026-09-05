@@ -26,10 +26,31 @@ An organizer reviews the recommendation before making a final decision. If the i
 
 
 ```mermaid
+
 flowchart TD
-    T1["T1: First task"] --> T2["T2: Second task"]
-    T2 --> D1{"Decision condition?"}
-    D1 -->|Yes| T3["T3: Next task"]
-    D1 -->|No| H1["Human review"]
-    H1 --> T3
-    T3 --> C1([C1: Completion state])
+    T1["T1: Get registration information"] --> T2["T2: Get optional attendance responses"]
+    T2 --> T3["T3: Check the information"]
+    T3 --> D1{"Is the information complete?"}
+
+    D1 -->|Yes| T4["T4: Estimate attendance"]
+    D1 -->|No| H1["H1: Ask organizer to review information"]
+
+    H1 --> D2{"Can the organizer fix the information?"}
+    D2 -->|Yes| T3
+    D2 -->|No| C2([C2: Stop without a recommendation])
+
+    T4 --> D3{"Does the estimate look reasonable?"}
+    D3 -->|Yes| T5["T5: Suggest supply amounts"]
+    D3 -->|No| H2["H2: Ask organizer to review estimate"]
+
+    H2 --> T5
+    T5 --> T6["T6: Show recommendation to organizer"]
+    T6 --> D4{"Does the organizer approve it?"}
+
+    D4 -->|Yes| T7["T7: Save supply plan"]
+    D4 -->|Change it| T8["T8: Save changed supply plan"]
+    D4 -->|Request new estimate| T1
+
+    T7 --> C1([C1: Supply plan is complete])
+    T8 --> C1
+```
