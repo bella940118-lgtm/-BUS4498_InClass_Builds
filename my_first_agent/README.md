@@ -7,16 +7,16 @@
 
 ### System Designer Name
 
-[Enter your name.]
+Bella Chu
 
 
 ### System Name
 
-[Use a default name "HackTrack" or enter the name you choose for the system.]
+HackTrack
 
 ### System Goal
-[Read Chapter 2 Section 2.1, then enter the well-structured goal of your agentic system]
+For CPVC hackathon organizers and registered students, improve event planning by predicting how many registered students will actually attend, so that CPVC can prepare and appropriate amount of food, drinks and swag. Success will be measured by reducing the difference between predicted and actual attendance from about 25% to 10% or less, without collecting unndecessary personal information or sending students more than one confirmation reminder.
+
 
 ### Who Is Better Off When This Works?
-
-[In one complete sentence, identify who will be better off when the system works.]
+CPVC organizers and registered students are better off because organizers can spend the event budget on quantities that better match real attendance, while students are more likely to have adequate food, drinks and swag when they arrive.
