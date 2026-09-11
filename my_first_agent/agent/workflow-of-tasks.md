@@ -27,33 +27,48 @@ Organizers review the forecast report. If they do not accept it, they can correc
 
 ```mermaid
 flowchart TD
-    T1["T1: Start scheduled or requested run"]
-    T2["T2: Retrieve registration total"]
-    T3["T3: Retrieve voluntary RSVP totals"]
-    T4["T4: Retrieve aggregate event history"]
-    T5["T5: Remove unnecessary personal data"]
-    T6["T6: Validate totals and data quality"]
-    D1{"D1: Is required data available?"}
-    T7["T7: Flag missing-data issue"]
-    T8["T8: Calculate low, expected, and high attendance"]
-    D2{"D2: Is forecast uncertainty high?"}
-    T9["T9: Calculate supply recommendations"]
-    T10["T10: Create forecast report"]
-    T11["T11: Display report for organizer review"]
-    D3{"D3: Does organizer accept the forecast?"}
-    T12["T12: Correct data or adjust assumptions"]
-    D4{"D4: Approve one confirmation reminder?"}
-    T13["T13: Prepare and send one reminder"]
-    E1["End: Deliver approved forecast report"]
+    T1[Start scheduled or requested run]
+    T2[Retrieve individual registration records and attendance signals in parallel]
+    T3[Remove unnecessary personal data]
+    T4[Validate data quality and required fields]
+    D1{Is required individual-level data available?}
+    T5[Flag missing-data issue]
+    T6[Estimate each registrant's likelihood of attending]
+    T7[Calculate low expected and high attendance forecasts]
+    D2{Is forecast uncertainty high?}
+    T8[Calculate supply recommendations]
+    T9[Create forecast report]
+    T10[Display report for organizer review]
+    D3{Does organizer accept the forecast?}
+    T11[Correct data or adjust assumptions]
+    D4{Approve one confirmation reminder?}
+    T12[Prepare and send one reminder]
+    E1[Deliver approved forecast report]
 
-    T1 --> T2 --> T3 --> T4 --> T5 --> T6 --> D1
-    D1 -- No --> T7 --> T11
-    D1 -- Yes --> T8 --> D2
-    D2 -- No --> T9 --> T10 --> T11
-    D2 -- Yes --> T10 --> T11
-    T11 --> D3
-    D3 -- No --> T12 --> T8
-    D3 -- Yes --> D4
-    D4 -- Yes --> T13 --> E1
-    D4 -- No --> E1
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+    T4 --> D1
+
+    D1 -->|No| T5
+    T5 --> T10
+
+    D1 -->|Yes| T6
+    T6 --> T7
+    T7 --> D2
+
+    D2 -->|No| T8
+    T8 --> T9
+    D2 -->|Yes| T9
+
+    T9 --> T10
+    T10 --> D3
+
+    D3 -->|No| T11
+    T11 --> T6
+
+    D3 -->|Yes| D4
+    D4 -->|Yes| T12
+    T12 --> E1
+    D4 -->|No| E1
 ```
