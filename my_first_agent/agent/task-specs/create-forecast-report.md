@@ -16,6 +16,12 @@ Create a structured organizer report containing the forecast, uncertainty, assum
 - **Source:** T7 Calculate low expected and high attendance forecasts.
 - **If a required input is missing or invalid:** Create an exception report through T5.
 
+### Input 2
+- **Input name:** Supply recommendations
+- **Contents and format:** Recommended food, drink, and swag quantities, approved buffers, calculation assumptions, and status.
+- **Source:** T8 Calculate supply recommendations.
+- **If a required input is missing or invalid:** Create the report without supply recommendations only when T7 identifies high uncertainty; otherwise send the case to T5 Flag missing-data issue.
+
 ## 3. Outputs
 ### Output 1
 - **Output name:** Forecast report
