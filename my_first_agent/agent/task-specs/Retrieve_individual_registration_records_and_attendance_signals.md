@@ -9,10 +9,14 @@ task_owner: "HackTrack forecast operations owner"
 # Agent Inference Configuration
 Provider: Groq
 Model: "openai/gpt-oss-120b"
-Role: Assess approved source availability, interpret retrieval results, compare available registration and attendance fields, and determine whether the retrieved data is complete enough to continue to T3 and T4.
-Maximum inference requests per task run: 4
-On inference failure or exhausted limits: Record the unresolved status and hand the case to CPVC AI Hackathon organizer.
-
+Role: >
+  Assess approved source availability, interpret retrieval results, compare
+  available registration and attendance fields, and determine whether the
+  retrieved data is sufficient to continue to T3 and T4.
+Maximum inference requests per task run: 1
+On inference failure or exhausted limits: >
+  Record the unresolved status, preserve confirmed retrieval evidence, and
+  hand the case to the CPVC AI Hackathon organizer.
 ```
 
 ## 1. Task Goal
