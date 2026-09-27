@@ -35,6 +35,8 @@ Organizers review the forecast report. If they do not accept it, they may correc
 
 The workflow ends when the approved forecast report is delivered to organizers, with any explicitly approved reminder completed. Exception cases end when the exception report is delivered and HackTrack has stopped autonomous processing pending organizer action.
 
+### 1.5 Workflow Diagram
+
 
 ~~~mermaid
 flowchart TD
