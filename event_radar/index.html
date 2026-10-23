@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Find campus club events and share an announcement with Club Event Radar.">
+  <title>Club Event Radar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <p class="kicker">Campus clubs</p>
+      <h1>Club Event Radar</h1>
+      <p class="lede">Find what’s happening on campus. Share a club announcement and we’ll turn it into an event card.</p>
+      <ul class="badges">
+        <li>Made for students</li>
+        <li>Campus and online events</li>
+        <li>Posts checked before publishing</li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <section class="card post" aria-labelledby="post-heading">
+      <h2 id="post-heading">Share an event</h2>
+      <p class="muted">Paste your club’s announcement. Include the date, start time, and place so students can find it.</p>
+      <form id="post-form">
+        <label for="announcement">Announcement <span class="hint">1–2000 characters</span></label>
+        <textarea id="announcement" name="announcement" minlength="1" maxlength="2000" required placeholder="Club name, event, date, time, place, and details"></textarea>
+        <button id="post-button" type="submit">Check and post event</button>
+      </form>
+      <div id="post-result" class="result" role="status" aria-live="polite" hidden></div>
+    </section>
+
+    <section class="board-section" aria-labelledby="board-heading">
+      <div class="board-head">
+        <h2 id="board-heading">Upcoming events</h2>
+        <button id="refresh-button" class="ghost" type="button">Refresh</button>
+      </div>
+      <div class="filters" role="group" aria-label="Filter events">
+        <button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" type="button" data-filter="free" aria-pressed="false">Free</button>
+        <button class="chip" type="button" data-filter="food" aria-pressed="false">Free food</button>
+      </div>
+      <p id="board-status" class="muted" role="status" aria-live="polite"></p>
+      <ul id="event-board" class="board"><li class="empty">Loading events…</li></ul>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Practice project for BUS 4498. Posting rules are not Cal Poly or ASI policy.</p>
+    <p><a href="sign-in.html">Moderator sign-in</a></p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

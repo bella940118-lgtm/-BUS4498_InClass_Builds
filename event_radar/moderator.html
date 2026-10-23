@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moderator area · Club Event Radar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="moderator">
+  <header class="top"><div class="wrap">
+    <p class="kicker">Club Event Radar</p>
+    <h1>Moderator area</h1>
+  </div></header>
+  <main class="wrap auth-wrap">
+    <p id="auth-status" role="status" aria-live="polite">Checking your sign-in…</p>
+    <section id="protected-content" class="card" hidden>
+      <h2>Signed in</h2>
+      <p>Account: <strong id="account-email"></strong></p>
+      <p>Posts awaiting review will appear here after the event database and posting flow are set up.</p>
+      <button data-sign-out type="button">Sign out</button>
+      <p><a href="index.html">Back to event radar</a></p>
+    </section>
+    <section id="access-denied" class="card" hidden>
+      <h2>Access denied</h2>
+      <p>This account is signed in but is not on the moderator list.</p>
+      <button data-sign-out type="button">Sign out</button>
+    </section>
+  </main>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

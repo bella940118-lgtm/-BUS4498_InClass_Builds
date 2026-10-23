@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moderator sign-in · Club Event Radar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="sign-in">
+  <header class="top"><div class="wrap">
+    <p class="kicker">Club Event Radar</p>
+    <h1>Moderator sign-in</h1>
+    <p class="lede">Use the moderator account created in Supabase.</p>
+  </div></header>
+  <main class="wrap auth-wrap"><section class="card">
+    <form id="sign-in-form">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button id="sign-in-button" type="submit">Sign in</button>
+    </form>
+    <p id="auth-status" role="status" aria-live="polite"></p>
+    <p><a href="index.html">Back to event radar</a></p>
+  </section></main>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
