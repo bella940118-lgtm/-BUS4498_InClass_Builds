@@ -9,9 +9,20 @@
   const boardStatus = document.getElementById('board-status');
   const refreshButton = document.getElementById('refresh-button');
   const filters = Array.from(document.querySelectorAll('[data-filter]'));
+  const moderation = document.getElementById('moderation');
+  const moderatorLink = document.getElementById('moderator-link');
+  const moderatorForm = document.getElementById('moderator-form');
+  const signInButton = document.getElementById('moderator-sign-in');
+  const signInPanel = document.getElementById('sign-in-panel');
+  const reviewPanel = document.getElementById('review-panel');
+  const moderatorAccount = document.getElementById('moderator-account');
+  const moderatorStatus = document.getElementById('moderator-status');
+  const signOutButton = document.getElementById('moderator-sign-out');
+  const waitingBoard = document.getElementById('waiting-board');
   const publicColumns = 'id,created_at,status,title,club,event_date,start_time,end_time,place_name,place_detail,cost,free_food,summary,flyer_url';
   let events = [];
   let activeFilter = 'all';
+  let moderator = null;
 
   function textElement(tag, className, value) {
     const element = document.createElement(tag);
@@ -131,11 +142,13 @@
     form.addEventListener('submit', (event) => event.preventDefault());
     submitButton.disabled = true;
     refreshButton.disabled = true;
+    signInButton.disabled = true;
+    moderatorStatus.textContent = 'Moderator sign-in is unavailable until the Supabase connection is fixed.';
     return;
   }
 
   const client = window.supabase.createClient(config.supabaseUrl, config.publishableKey, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   });
 
   async function loadEvents() {
@@ -213,5 +226,127 @@
     }
   });
 
+  function setModeratorStatus(message) {
+    moderatorStatus.textContent = message;
+  }
+
+  function showModerator(user) {
+    moderator = user;
+    signInPanel.hidden = Boolean(user);
+    reviewPanel.hidden = !user;
+    moderatorAccount.textContent = user ? `Signed in as ${user.email || 'moderator'}.` : '';
+    if (user) moderation.open = true;
+    else waitingBoard.replaceChildren();
+  }
+
+  async function loadWaitingEvents() {
+    if (!moderator) return;
+    waitingBoard.replaceChildren(textElement('li', 'empty', 'Loading waiting posts…'));
+    const { data, error } = await client.from('events')
+      .select('id,status,status_reason,announcement,title,club,event_date,start_time,end_time,place_name,place_detail,cost,free_food,summary,flyer_url,note_for_moderator')
+      .eq('status', 'waiting')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (error) {
+      waitingBoard.replaceChildren(textElement('li', 'empty', 'Could not load waiting posts. Please sign in again or reload.'));
+      return;
+    }
+    if (!data.length) {
+      waitingBoard.replaceChildren(textElement('li', 'empty', 'No posts are waiting for review.'));
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    for (const post of data) {
+      const card = createCard(post);
+      const review = document.createElement('div');
+      review.className = 'review';
+      review.append(textElement('p', 'why', post.status_reason || 'This post needs moderator review.'));
+      if (post.note_for_moderator) review.append(textElement('p', 'why', post.note_for_moderator));
+      review.append(textElement('p', 'original', post.announcement));
+      const actions = document.createElement('p');
+      actions.className = 'actions';
+      const approve = textElement('button', '', 'Approve');
+      approve.type = 'button';
+      const reject = textElement('button', 'ghost', 'Reject');
+      reject.type = 'button';
+      approve.addEventListener('click', () => reviewPost(post.id, 'published', actions));
+      reject.addEventListener('click', () => reviewPost(post.id, 'rejected', actions));
+      actions.append(approve, reject);
+      review.append(actions);
+      card.append(review);
+      fragment.append(card);
+    }
+    waitingBoard.replaceChildren(fragment);
+  }
+
+  async function reviewPost(id, status, actions) {
+    if (!moderator) return;
+    for (const button of actions.querySelectorAll('button')) button.disabled = true;
+    setModeratorStatus('Saving your review…');
+    try {
+      const { data, error } = await client.from('events').update({
+        status,
+        status_reason: status === 'published' ? 'Approved by moderator.' : 'Rejected by moderator.',
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: moderator.id,
+      }).eq('id', id).eq('status', 'waiting').select('id');
+      if (error) throw error;
+      await loadWaitingEvents();
+      if (!data.length) {
+        setModeratorStatus('This post was already reviewed. The waiting list is refreshed.');
+        return;
+      }
+      if (status === 'published') await loadEvents();
+      setModeratorStatus(status === 'published' ? 'Post approved and added to the website.' : 'Post rejected.');
+    } catch (_) {
+      setModeratorStatus('Could not save the review. Please try again.');
+      for (const button of actions.querySelectorAll('button')) button.disabled = false;
+    }
+  }
+
+  moderatorForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    signInButton.disabled = true;
+    setModeratorStatus('Signing in…');
+    const email = moderatorForm.elements.email.value.trim();
+    const password = moderatorForm.elements.password.value;
+    try {
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error || !data.user) throw error || new Error('No user');
+      moderatorForm.elements.password.value = '';
+      showModerator(data.user);
+      setModeratorStatus('Signed in.');
+      await loadWaitingEvents();
+    } catch (_) {
+      moderatorForm.elements.password.value = '';
+      setModeratorStatus('Could not sign in. Check your email and password.');
+    } finally {
+      signInButton.disabled = false;
+    }
+  });
+
+  signOutButton.addEventListener('click', async () => {
+    signOutButton.disabled = true;
+    const { error } = await client.auth.signOut({ scope: 'local' });
+    signOutButton.disabled = false;
+    if (error) {
+      setModeratorStatus('Could not sign out. Please try again.');
+      return;
+    }
+    showModerator(null);
+    setModeratorStatus('Signed out.');
+  });
+
+  moderatorLink.addEventListener('click', () => { moderation.open = true; });
+  if (window.location.hash === '#moderation') moderation.open = true;
+
+  async function restoreModerator() {
+    const { data, error } = await client.auth.getUser();
+    if (error || !data.user) return;
+    showModerator(data.user);
+    await loadWaitingEvents();
+  }
+
   loadEvents();
+  restoreModerator();
 })();

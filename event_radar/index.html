@@ -47,12 +47,32 @@
       </div>
       <p id="board-status" class="muted" role="status" aria-live="polite"></p>
       <ul id="event-board" class="board"><li class="empty">Loading events…</li></ul>
+
+      <details id="moderation" class="card mod">
+        <summary>Moderator sign-in</summary>
+        <div id="sign-in-panel">
+          <form id="moderator-form">
+            <label for="moderator-email">Email</label>
+            <input id="moderator-email" name="email" type="email" autocomplete="username" required>
+            <label for="moderator-password">Password</label>
+            <input id="moderator-password" name="password" type="password" autocomplete="current-password" required>
+            <button id="moderator-sign-in" type="submit">Sign in</button>
+          </form>
+        </div>
+        <div id="review-panel" hidden>
+          <p id="moderator-account" class="muted"></p>
+          <p><button id="moderator-sign-out" class="ghost" type="button">Sign out</button></p>
+          <h3>Waiting for review</h3>
+          <ul id="waiting-board" class="board preview"><li class="empty">Loading waiting posts…</li></ul>
+        </div>
+        <p id="moderator-status" role="status" aria-live="polite"></p>
+      </details>
     </section>
   </main>
 
   <footer class="wrap foot">
     <p>Practice project for BUS 4498. Posting rules are not Cal Poly or ASI policy.</p>
-    <p><a href="sign-in.html">Moderator sign-in</a></p>
+    <p><a id="moderator-link" href="#moderation">Moderator sign-in</a></p>
   </footer>
 
   <script src="config.js"></script>

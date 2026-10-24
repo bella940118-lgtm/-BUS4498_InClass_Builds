@@ -145,3 +145,5 @@ button.ghost:hover { border-color: var(--accent); box-shadow: none; }
   .flyer { grid-column: 1 / -1; width: 100%; height: 190px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.event > .review { grid-column: 1 / -1; }
