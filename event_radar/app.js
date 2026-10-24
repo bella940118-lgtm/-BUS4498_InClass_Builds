@@ -9,7 +9,7 @@
   const boardStatus = document.getElementById('board-status');
   const refreshButton = document.getElementById('refresh-button');
   const filters = Array.from(document.querySelectorAll('[data-filter]'));
-  const publicColumns = 'id,created_at,status,title,club,event_date,start_time,end_time,place_name,place_detail,cost,free_food,summary';
+  const publicColumns = 'id,created_at,status,title,club,event_date,start_time,end_time,place_name,place_detail,cost,free_food,summary,flyer_url';
   let events = [];
   let activeFilter = 'all';
 
@@ -50,6 +50,21 @@
     }).format(new Date(Date.UTC(2020, 0, 1, hour, minute)));
   }
 
+  function trustedFlyerUrl(value) {
+    if (typeof value !== 'string' || !value) return '';
+    try {
+      const project = new URL(config.supabaseUrl);
+      const photo = new URL(value);
+      const expectedPath = '/storage/v1/object/public/flyers/';
+      if (photo.origin !== project.origin || !photo.pathname.startsWith(expectedPath)) return '';
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(?:jpg|png)$/i.test(photo.pathname.slice(expectedPath.length))) return '';
+      if (photo.search || photo.hash) return '';
+      return photo.href;
+    } catch (_) {
+      return '';
+    }
+  }
+
   function createCard(event) {
     const item = document.createElement('li');
     item.className = 'event';
@@ -83,6 +98,15 @@
     if (event.free_food) tags.append(textElement('span', 'tag food', '🍕 Free food'));
     if (tags.childElementCount) body.append(tags);
     item.append(badge, body);
+    const flyerUrl = trustedFlyerUrl(event.flyer_url);
+    if (flyerUrl) {
+      const flyer = document.createElement('img');
+      flyer.className = 'flyer';
+      flyer.src = flyerUrl;
+      flyer.alt = `Flyer for ${event.title || 'this event'}`;
+      flyer.loading = 'lazy';
+      item.append(flyer);
+    }
     return item;
   }
 
@@ -147,8 +171,13 @@
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const announcement = form.elements.announcement.value.trim();
+    const flyer = form.elements.flyer.files[0];
     if (!announcement || announcement.length > 2000) {
       showResult('error', 'Could not post', 'Enter an announcement between 1 and 2000 characters.');
+      return;
+    }
+    if (flyer && (!['image/jpeg', 'image/png'].includes(flyer.type) || flyer.size < 1 || flyer.size > 5 * 1024 * 1024)) {
+      showResult('error', 'Could not post', 'Choose a JPG or PNG photo up to 5 MB.');
       return;
     }
     submitButton.disabled = true;
@@ -156,6 +185,7 @@
     try {
       const body = new FormData();
       body.set('announcement', announcement);
+      if (flyer) body.set('flyer', flyer);
       const response = await fetch(`${config.supabaseUrl}/functions/v1/submit-event`, {
         method: 'POST',
         headers: { apikey: config.publishableKey },

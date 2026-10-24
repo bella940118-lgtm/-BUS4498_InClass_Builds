@@ -28,6 +28,8 @@
       <form id="post-form">
         <label for="announcement">Announcement <span class="hint">1–2000 characters</span></label>
         <textarea id="announcement" name="announcement" minlength="1" maxlength="2000" required placeholder="Club name, event, date, time, place, and details"></textarea>
+        <label for="flyer">Flyer photo <span class="hint">Optional JPG or PNG, up to 5 MB. Photo posts wait for moderator review.</span></label>
+        <input id="flyer" name="flyer" type="file" accept="image/jpeg,image/png">
         <button id="post-button" type="submit">Check and post event</button>
       </form>
       <div id="post-result" class="result" role="status" aria-live="polite" hidden></div>
