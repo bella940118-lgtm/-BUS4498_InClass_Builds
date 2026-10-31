@@ -207,6 +207,9 @@ async function handleRequest(request: Request): Promise<Response> {
 
   let announcement: unknown;
   let flyer: File | null = null;
+  let source = '';
+  let sourceId = '';
+  let sourceName = '';
   try {
     const contentType = request.headers.get('content-type') || '';
     if (contentType.includes('multipart/form-data') || contentType.includes('application/x-www-form-urlencoded')) {
@@ -218,7 +221,24 @@ async function handleRequest(request: Request): Promise<Response> {
       }
       announcement = form.get('announcement');
     } else if (contentType.includes('application/json')) {
-      announcement = (await request.json()).announcement;
+      const payload = await request.json();
+      announcement = payload.announcement;
+      if (payload.source !== undefined || payload.source_id !== undefined) {
+        if (typeof payload.source !== 'string' || typeof payload.source_id !== 'string') {
+          return json({ ok: false, message: 'A chat source and message ID must be strings.' }, 400);
+        }
+        source = payload.source.trim().slice(0, 40);
+        sourceId = payload.source_id.trim().slice(0, 200);
+        if (!source || !sourceId) {
+          return json({ ok: false, message: 'A chat source and message ID are both required.' }, 400);
+        }
+        if (typeof payload.source_name === 'string') sourceName = payload.source_name.trim().slice(0, 160);
+      }
+      // Stage 12 uses thread context. Accept it now so chat readers can send it.
+      if (payload.thread !== undefined &&
+        (!Array.isArray(payload.thread) || payload.thread.some((item: unknown) => typeof item !== 'string'))) {
+        return json({ ok: false, message: 'Chat context must be a list of messages.' }, 400);
+      }
     } else {
       return json({ ok: false, message: 'Send a form or JSON body with an announcement.' }, 415);
     }
@@ -240,6 +260,17 @@ async function handleRequest(request: Request): Promise<Response> {
   const db = createClient(supabaseUrl, databaseKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  if (sourceId) {
+    const { data: prior, error: priorError } = await db.from('events')
+      .select('id').eq('source', source).eq('source_id', sourceId).maybeSingle();
+    if (priorError) {
+      console.error('Could not check chat message:', priorError.code);
+      return json({ ok: false, message: 'The event service is temporarily unavailable.' }, 503);
+    }
+    if (prior) {
+      return json({ ok: true, status: 'duplicate', already_read: true, message: 'This chat message was already read.', reasons: [], event: null });
+    }
+  }
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { count, error: countError } = await db.from('events')
     .select('id', { count: 'exact', head: true }).gte('created_at', since);
@@ -343,9 +374,19 @@ async function handleRequest(request: Request): Promise<Response> {
     note_for_moderator: typeof card.note_for_moderator === 'string' ? card.note_for_moderator.slice(0, 1000) : '',
     dedupe_key: dedupeKey,
     ai_model: 'claude-haiku-5-5',
+    source,
+    source_id: sourceId,
+    source_name: sourceName,
   };
   let { data: event, error: insertError } = await db.from('events').insert(row).select().single();
   if (insertError?.code === '23505') {
+    if (sourceId) {
+      const { data: prior } = await db.from('events')
+        .select('id').eq('source', source).eq('source_id', sourceId).maybeSingle();
+      if (prior) {
+        return json({ ok: true, status: 'duplicate', already_read: true, message: 'This chat message was already read.', reasons: [], event: null });
+      }
+    }
     return json({ ok: true, status: 'duplicate', message: 'This event is already posted.', reasons: [], event: null });
   }
   if (insertError) {
